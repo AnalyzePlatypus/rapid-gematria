@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidGematria</title>
+    
+    <meta name="description" content="The simple, fast, in-browser Gematria calculator">
+    
+    <meta name='node_env' content='production'>
+    <meta name='recapatcha_public_key' content=''>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600&display=swap" rel="stylesheet">
+
+
+  <style>
+     :root {
+  --shadow-color: 210deg 5% 75%;
+  --shadow-elevation-low:
+    1px 1px 1.6px hsl(var(--shadow-color) / 0.2),
+    1.5px 1.5px 2.4px -1.2px hsl(var(--shadow-color) / 0.2),
+    3.2px 3.2px 5.2px -2.3px hsl(var(--shadow-color) / 0.21);
+  --shadow-elevation-medium:
+    1px 1px 1.6px hsl(var(--shadow-color) / 0.21),
+    2.9px 2.9px 4.7px -0.8px hsl(var(--shadow-color) / 0.21),
+    6.8px 6.8px 11px -1.6px hsl(var(--shadow-color) / 0.22),
+    16.2px 16.2px 26.3px -2.3px hsl(var(--shadow-color) / 0.23);
+  --shadow-elevation-high:
+    1px 1px 1.6px hsl(var(--shadow-color) / 0.19),
+    4.1px 4.1px 6.7px -0.3px hsl(var(--shadow-color) / 0.19),
+    7.4px 7.4px 12px -0.7px hsl(var(--shadow-color) / 0.2),
+    11.7px 11.7px 19px -1px hsl(var(--shadow-color) / 0.2),
+    18.3px 18.3px 29.7px -1.3px hsl(var(--shadow-color) / 0.2),
+    28.2px 28.2px 45.8px -1.7px hsl(var(--shadow-color) / 0.21),
+    42.4px 42.4px 68.8px -2px hsl(var(--shadow-color) / 0.21),
+    62px 62px 100.6px -2.3px hsl(var(--shadow-color) / 0.21);
+
+    --green-400: #34D399;
+    --green-500: #10B981;
+    --green-600: #059669;
+    --green-700: #047857;
+
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+}
+
+      * {
+        font-family: 'Heebo', sans-serif;
+      }
+      
+      html, body {
+        background: #F9FAFB;
+      }
+
+      input, button {
+        transition: all .3s ease-in-out;
+      }
+
+      .main-card {
+        border: 1px solid #eaeaea;
+        background: white;
+        padding: 1rem;
+        border-radius: 2rem;
+        max-width: 400px;
+        margin: 4rem auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: var(--shadow-elevation-medium);
+      }
+
+      .h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        padding-top: 1rem;
+        color: var(--green-700);
+      }
+
+      .results {
+        font-size: 1.5rem;
+         margin-bottom: .5rem;
+      }
+
+      .results .value {
+        font-weight: 600;
+      }
+      
+
+      .form-group {
+        display: flex;
+      }
+
+      .search-field {
+        font-size: 1.5rem;
+        border: 2px solid #f0f0f0;
+        width: 100%;
+        padding: .25rem 1rem;
+        border-radius: .75rem 0rem  0rem .75rem;
+      }
+
+      .search-field:hover {
+        border-color: #e0e0e0
+      }
+
+      .search-btn {
+        background: #10B981;
+        color: white;
+        padding: .25rem 1rem;
+        border-radius: 0rem .75rem .75rem 0rem;
+        font-weight: 600;
+      }
+
+      .search-btn:hover {
+         background: #059669;
+      }
+
+      .button-secondary {
+        color: var(--green-700);
+        background: transparent;
+        border: 3px solid var(--green-700);
+        padding: .25rem 1rem;
+        border-radius: .75rem;
+        font-weight: 400;
+      }
+
+
+      .flex {
+        display: flex;
+      }
+
+      .flex-row {
+        flex-direction: row;
+      }
+
+      .flex-col {
+        flex-direction: column;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      .w-fit {
+        width: fit-content;
+        margin: 0 auto;
+      }
+
+      .history-cell {
+        font-size: 1.5rem;
+        width: 300px;
+        border-bottom: 2px solid var(--gray-200);
+        padding: .25rem 1rem;
+      }
+
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+
+       
+      .grecaptcha-badge {
+        visibility: hidden; 
+      }
+    </style>
+
+    <style>
+      /*! tailwindcss v2.2.19 | MIT License | https://tailwindcss.com */
+
+      /*! modern-normalize v1.1.0 | MIT License | https://github.com/sindresorhus/modern-normalize */
+
+      /*
+      Document
+      ========
+      */
+
+      /**
+      Use a better box model (opinionated).
+      */
+
+      *,
+      ::before,
+      ::after {
+        box-sizing: border-box;
+      }
+
+      /**
+      Use a more readable tab size (opinionated).
+      */
+
+      html {
+        -moz-tab-size: 4;
+        tab-size: 4;
+      }
+
+      /**
+      1. Correct the line height in all browsers.
+      2. Prevent adjustments of font size after orientation changes in iOS.
+      */
+
+      html {
+        line-height: 1.15; /* 1 */
+        -webkit-text-size-adjust: 100%; /* 2 */
+      }
+
+      /*
+      Sections
+      ========
+      */
+
+      /**
+      Remove the margin in all browsers.
+      */
+
+      body {
+        margin: 0;
+      }
+
+      /**
+      Improve consistency of default fonts in all browsers. (https://github.com/sindresorhus/modern-normalize/issues/3)
+      */
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system, /* Firefox supports this but not yet `system-ui` */
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif,
+          'Apple Color Emoji',
+          'Segoe UI Emoji';
+      }
+
+      /*
+      Grouping content
+      ================
+      */
+
+      /**
+      1. Add the correct height in Firefox.
+      2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+      */
+
+      hr {
+        height: 0; /* 1 */
+        color: inherit; /* 2 */
+      }
+
+      /*
+      Text-level semantics
+      ====================
+      */
+
+      /**
+      Add the correct text decoration in Chrome, Edge, and Safari.
+      */
+
+      abbr[title] {
+        -webkit-text-decoration: underline dotted;
+                text-decoration: underline dotted;
+      }
+
+      /**
+      Add the correct font weight in Edge and Safari.
+      */
+
+      b,
+      strong {
+        font-weight: bolder;
+      }
+
+      /**
+      1. Improve consistency of default fonts in all browsers. (https://github.com/sindresorhus/modern-normalize/issues/3)
+      2. Correct the odd 'em' font sizing in all browsers.
+      */
+
+      code,
+      kbd,
+      samp,
+      pre {
+        font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          'Liberation Mono',
+          Menlo,
+          monospace; /* 1 */
+        font-size: 1em; /* 2 */
+      }
+
+      /**
+      Add the correct font size in all browsers.
+      */
+
+      small {
+        font-size: 80%;
+      }
+
+      /**
+      Prevent 'sub' and 'sup' elements from affecting the line height in all browsers.
+      */
+
+      sub,
+      sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+      }
+
+      sub {
+        bottom: -0.25em;
+      }
+
+      sup {
+        top: -0.5em;
+      }
+
+      /*
+      Tabular data
+      ============
+      */
+
+      /**
+      1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+      2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+      */
+
+      table {
+        text-indent: 0; /* 1 */
+        border-color: inherit; /* 2 */
+      }
+
+      /*
+      Forms
+      =====
+      */
+
+      /**
+      1. Change the font styles in all browsers.
+      2. Remove the margin in Firefox and Safari.
+      */
+
+      button,
+      input,
+      optgroup,
+      select,
+      textarea {
+        font-family: inherit; /* 1 */
+        font-size: 100%; /* 1 */
+        line-height: 1.15; /* 1 */
+        margin: 0; /* 2 */
+      }
+
+      /**
+      Remove the inheritance of text transform in Edge and Firefox.
+      1. Remove the inheritance of text transform in Firefox.
+      */
+
+      button,
+      select { /* 1 */
+        text-transform: none;
+      }
+
+      /**
+      Correct the inability to style clickable types in iOS and Safari.
+      */
+
+      button,
+      [type='button'],
+      [type='reset'],
+      [type='submit'] {
+        -webkit-appearance: button;
+      }
+
+      /**
+      Remove the inner border and padding in Firefox.
+      */
+
+      ::-moz-focus-inner {
+        border-style: none;
+        padding: 0;
+      }
+
+      /**
+      Restore the focus styles unset by the previous rule.
+      */
+
+      :-moz-focusring {
+        outline: 1px dotted ButtonText;
+      }
+
+      /**
+      Remove the additional ':invalid' styles in Firefox.
+      See: https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737
+      */
+
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+
+      /**
+      Remove the padding so developers are not caught out when they zero out 'fieldset' elements in all browsers.
+      */
+
+      legend {
+        padding: 0;
+      }
+
+      /**
+      Add the correct vertical alignment in Chrome and Firefox.
+      */
+
+      progress {
+        vertical-align: baseline;
+      }
+
+      /**
+      Correct the cursor style of increment and decrement buttons in Safari.
+      */
+
+      ::-webkit-inner-spin-button,
+      ::-webkit-outer-spin-button {
+        height: auto;
+      }
+
+      /**
+      1. Correct the odd appearance in Chrome and Safari.
+      2. Correct the outline style in Safari.
+      */
+
+      [type='search'] {
+        -webkit-appearance: textfield; /* 1 */
+        outline-offset: -2px; /* 2 */
+      }
+
+      /**
+      Remove the inner padding in Chrome and Safari on macOS.
+      */
+
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+
+      /**
+      1. Correct the inability to style clickable types in iOS and Safari.
+      2. Change font properties to 'inherit' in Safari.
+      */
+
+      ::-webkit-file-upload-button {
+        -webkit-appearance: button; /* 1 */
+        font: inherit; /* 2 */
+      }
+
+      /*
+      Interactive
+      ===========
+      */
+
+      /*
+      Add the correct display in Chrome and Safari.
+      */
+
+      summary {
+        display: list-item;
+      }
+
+      /**
+      * Manually forked from SUIT CSS Base: https://github.com/suitcss/base
+      * A thin layer on top of normalize.css that provides a starting point more
+      * suitable for web applications.
+      */
+
+      /**
+      * Removes the default spacing and border for appropriate elements.
+      */
+
+      blockquote,
+      dl,
+      dd,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      hr,
+      figure,
+      p,
+      pre {
+        margin: 0;
+      }
+
+      button {
+        background-color: transparent;
+        background-image: none;
+      }
+
+      fieldset {
+        margin: 0;
+        padding: 0;
+      }
+
+      ol,
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      /**
+      * Tailwind custom reset styles
+      */
+
+      /**
+      * 1. Use the user's configured `sans` font-family (with Tailwind's default
+      *    sans-serif font stack as a fallback) as a sane default.
+      * 2. Use Tailwind's default "normal" line-height so the user isn't forced
+      *    to override it to ensure consistency even when using the default theme.
+      */
+
+      html {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 1 */
+        line-height: 1.5; /* 2 */
+      }
+
+      /**
+      * Inherit font-family and line-height from `html` so users can set them as
+      * a class directly on the `html` element.
+      */
+
+      body {
+        font-family: inherit;
+        line-height: inherit;
+      }
+
+      /**
+      * 1. Prevent padding and border from affecting element width.
+      *
+      *    We used to set this in the html element and inherit from
+      *    the parent element for everything else. This caused issues
+      *    in shadow-dom-enhanced elements like <details> where the content
+      *    is wrapped by a div with box-sizing set to `content-box`.
+      *
+      *    https://github.com/mozdevs/cssremedy/issues/4
+      *
+      *
+      * 2. Allow adding a border to an element by just adding a border-width.
+      *
+      *    By default, the way the browser specifies that an element should have no
+      *    border is by setting it's border-style to `none` in the user-agent
+      *    stylesheet.
+      *
+      *    In order to easily add borders to elements by just setting the `border-width`
+      *    property, we change the default border-style for all elements to `solid`, and
+      *    use border-width to hide them instead. This way our `border` utilities only
+      *    need to set the `border-width` property instead of the entire `border`
+      *    shorthand, making our border utilities much more straightforward to compose.
+      *
+      *    https://github.com/tailwindcss/tailwindcss/pull/116
+      */
+
+      *,
+      ::before,
+      ::after {
+        box-sizing: border-box; /* 1 */
+        border-width: 0; /* 2 */
+        border-style: solid; /* 2 */
+        border-color: currentColor; /* 2 */
+      }
+
+      /*
+      * Ensure horizontal rules are visible by default
+      */
+
+      hr {
+        border-top-width: 1px;
+      }
+
+      /**
+      * Undo the `border-style: none` reset that Normalize applies to images so that
+      * our `border-{width}` utilities have the expected effect.
+      *
+      * The Normalize reset is unnecessary for us since we default the border-width
+      * to 0 on all elements.
+      *
+      * https://github.com/tailwindcss/tailwindcss/issues/362
+      */
+
+      img {
+        border-style: solid;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        opacity: 1;
+        color: #9ca3af;
+      }
+
+      button,
+      [role="button"] {
+        cursor: pointer;
+      }
+
+      /**
+      * Override legacy focus reset from Normalize with modern Firefox focus styles.
+      *
+      * This is actually an improvement over the new defaults in Firefox in our testing,
+      * as it triggers the better focus styles even for links, which still use a dotted
+      * outline in Firefox by default.
+      */
+
+      :-moz-focusring {
+        outline: auto;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+
+      /**
+      * Reset links to optimize for opt-in styling instead of
+      * opt-out.
+      */
+
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+
+      /**
+      * Reset form element properties that are easy to forget to
+      * style explicitly so you don't inadvertently introduce
+      * styles that deviate from your design system. These styles
+      * supplement a partial reset that is already applied by
+      * normalize.css.
+      */
+
+      button,
+      input,
+      optgroup,
+      select,
+      textarea {
+        padding: 0;
+        line-height: inherit;
+        color: inherit;
+      }
+
+      /**
+      * Use the configured 'mono' font family for elements that
+      * are expected to be rendered with a monospace font, falling
+      * back to the system monospace stack if there is no configured
+      * 'mono' font family.
+      */
+
+      pre,
+      code,
+      kbd,
+      samp {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+
+      /**
+      * 1. Make replaced elements `display: block` by default as that's
+      *    the behavior you want almost all of the time. Inspired by
+      *    CSS Remedy, with `svg` added as well.
+      *
+      *    https://github.com/mozdevs/cssremedy/issues/14
+      * 
+      * 2. Add `vertical-align: middle` to align replaced elements more
+      *    sensibly by default when overriding `display` by adding a
+      *    utility like `inline`.
+      *
+      *    This can trigger a poorly considered linting error in some
+      *    tools but is included by design.
+      * 
+      *    https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210
+      */
+
+      img,
+      svg,
+      video,
+      canvas,
+      audio,
+      iframe,
+      embed,
+      object {
+        display: block; /* 1 */
+        vertical-align: middle; /* 2 */
+      }
+
+      /**
+      * Constrain images and videos to the parent width and preserve
+      * their intrinsic aspect ratio.
+      *
+      * https://github.com/mozdevs/cssremedy/issues/14
+      */
+
+      img,
+      video {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /**
+      * Ensure the default browser behavior of the `hidden` attribute.
+      */
+
+      [hidden] {
+        display: none;
+      }
+
+      *, ::before, ::after {
+        --tw-border-opacity: 1;
+        border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+      }
+    </style>
+
+    <script src="//js.honeybadger.io/v3.2/honeybadger.min.js" type="text/javascript"></script>
+
+    <script>
+      if(document.querySelector('meta[name="node_env"][content="production"]')) {
+        Honeybadger.configure({
+          apiKey: "",
+          environment: "production",
+        });
+      }
+    </script>
+
+
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-9B5M6QHN62');
+    </script>
+
+    <script>
+      const sum = (all, current) => all + current;
+      const and = (all, current) => all && current;
+      const or = (all, current) => all || current;
+
+      const REDUCERS = {
+          AND: and,
+          OR: or,
+          SUM: sum,
+      }
+
+      const GEMATRIA_TABLES = {
+      'standard': {
+          'א': 1,
+          'ב': 2,
+          'ג': 3,
+          'ד': 4,
+          'ה': 5,
+          'ו': 6,
+          'ז': 7,
+          'ח': 8,
+          'ט': 9,
+          'י': 10,
+          'כ': 20,
+          'ל': 30,
+          'מ': 40,
+          'נ': 50,
+          'ס': 60,
+          'ע': 70,
+          'פ': 80,
+          'צ': 90,
+          'ק': 100,
+          'ר': 200,
+          'ש': 300,
+          'ת': 400,
+          'ך': 20,
+          'ם': 40,
+          'ן': 50,
+          'ף': 80,
+          'ץ': 90
+      },
+      'final_letters': {
+          'א': 1,
+          'ב': 2,
+          'ג': 3,
+          'ד': 4,
+          'ה': 5,
+          'ו': 6,
+          'ז': 7,
+          'ח': 8,
+          'ט': 9,
+          'י': 10,
+          'כ': 20,
+          'ל': 30,
+          'מ': 40,
+          'נ': 50,
+          'ס': 60,
+          'ע': 70,
+          'פ': 80,
+          'צ': 90,
+          'ק': 100,
+          'ר': 200,
+          'ש': 300,
+          'ת': 400,
+          'ך': 500,
+          'ם': 600,
+          'ן': 700,
+          'ף': 800,
+          'ץ': 900
+      },
+      'ketana': {
+          'א': 1,
+          'ב': 2,
+          'ג': 3,
+          'ד': 4,
+          'ה': 5,
+          'ו': 6,
+          'ז': 7,
+          'ח': 8,
+          'ט': 9,
+          'י': 1,
+          'כ': 2,
+          'ל': 3,
+          'מ': 4,
+          'נ': 5,
+          'ס': 6,
+          'ע': 7,
+          'פ': 8,
+          'צ': 9,
+          'ק': 1,
+          'ר': 2,
+          'ש': 3,
+          'ת': 4,
+          'ך': 2,
+          'ם': 4,
+          'ן': 5,
+          'ף': 8,
+          'ץ': 9
+      },
+      'att_basch': {
+          'א': 400,
+          'ב': 300,
+          'ג': 200,
+          'ד': 100,
+          'ה': 90,
+          'ו': 80,
+          'ז': 70,
+          'ח': 60,
+          'ט': 50,
+          'י': 40,
+          'כ': 30,
+          'ל': 20,
+          'מ': 10,
+          'נ': 9,
+          'ס': 8,
+          'ע': 7,
+          'פ': 6,
+          'צ': 5,
+          'ק': 4,
+          'ר': 3,
+          'ש': 2,
+          'ת': 1,
+          'ך': 30,
+          'ם': 10,
+          'ן': 9,
+          'ף': 6,
+          'ץ': 5
+      }
+  };
+
+      class GematriaCalculator {
+
+          getPhraseValue(phrase, mode) {
+              // console.log('getPhraseValue with mode: ' + this.current_calculation_mode);
+              if (this.stringIsEmpty(phrase)) return 0;
+              return phrase.
+                trim().
+                split('').
+                map((char) => this.getCharValue(char, mode)).
+                reduce(REDUCERS.SUM);
+          }
+
+          getCharValue(char, mode) {
+              if (!mode) { mode = "standard" }
+              // console.log(`getCharValue(${char}, ${mode})`);
+              return GEMATRIA_TABLES[mode][char] || 0;
+          }
+
+          stringIsEmpty(str) {
+              return str.trim().length < 1;
+          }
+      }
+    </script>
+
+  </head>
+
+  <body class="flex flex-col" 
+    x-data="{
+      gematriaText: '',
+      gematriaMode: 'standard',
+      calulator: new GematriaCalculator,
+      get gematriaValue() {
+        return this.calulator.getPhraseValue(this.gematriaText, this.gematriaMode);
+      },
+      history: [],
+      addToHistory() {
+        this.history.unshift({
+          query: this.gematriaText,
+          gematriaMode: this.gematriaMode,
+          value: this.gematriaValue
+        });
+        this.resetForm();
+      },
+      get hasHistory() {
+        return this.history.length > 0;
+      },
+      resetForm() {
+        this.gematriaText = ''
+      },
+      resetHistory() {
+        this.history = [];
+      },
+      resetAll() {
+        this.resetForm();
+      }
+    }">
+   
+   <h1 class="h1 w-fit">
+    <a href='/'>
+      RapidGematria
+    </a>
+   </h1>
+   
+    <section 
+      class="main-card"  @keyup.enter.prevent='addToHistory()'>
+
+      
+      <p class="results">Gematria: <span class="value" x-text='gematriaValue'></span><p>
+
+      <form class="form-group">
+        <input class='search-field' type='text' placeholder='רשב“י' x-model='gematriaText'>
+        <button class='search-btn' type='button' @click="addToHistory()">Add</button>
+      </form>
+    </section>
+
+     <section class="w-fit flex flex-col items-center">
+        <div class="mb-4">
+          <template x-for='historyItem in history'>
+            <div class="flex flex-row justify-between history-cell">
+              <p x-text='historyItem.query'></p>
+              <p x-text='historyItem.value'></p>
+            </div>
+          </template>
+        </div>
+
+        <button x-show='hasHistory' type='button' class="button-secondary" @click='resetHistory()'>Clear history</button>
+      </section>
+  </body>
+
+  <footer>
+    <script defer src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9B5M6QHN62"></script>
+    <script async src="https://www.google.com/recaptcha/api.js?render=6Lf_oV0dAAAAAJTM1bGGJkf9vskFSXrSvmmG5tYD"></script>
+    
+  </footer>
+</html>
